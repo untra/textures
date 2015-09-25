@@ -1,7 +1,7 @@
 /*
- *  Projections
+ *  Objects in three dimensions
  *
- *  Draw 27 cubes to demonstrate orthogonal & prespective projections
+ *  Draws 3 Barells to demonstrate orthogonal & prespective projections
  *
  *  Key bindings:
  *  m          Toggle between perspective and orthogonal
@@ -31,6 +31,7 @@ int ph=0;         //  Elevation of view angle
 int fov=55;       //  Field of view (for perspective)
 double asp=1;     //  Aspect ratio
 double dim=5.0;   //  Size of world
+double idle = 0.0;
 
 //  Macro for sin & cos in degrees
 #define Cos(th) cos(3.1415927/180*(th))
@@ -81,16 +82,32 @@ static void Project()
 
 static void barrel(double x,double y,double z,
                  double dx,double dy,double dz,
-                 double th )
+                 double ux,double uy, double uz )
   {
     int resolution = 24;
     double fraction = 15;
     double ex = 1.25;
+    double D0 = sqrt(dx*dx+dy*dy+dz*dz);
+    double X0 = dx/D0;
+    double Y0 = dy/D0;
+    double Z0 = dz/D0;
+    double D1 = sqrt(ux*ux+uy*uy+uz*uz);
+    double X1 = ux/D1;
+    double Y1 = uy/D1;
+    double Z1 = uz/D1;
+    double X2 = Y0*Z1-Y1*Z0;
+    double Y2 = Z0*X1-Z1*X0;
+    double Z2 = X0*Y1-X1*Y0;
+    double mat[16];
+    mat[0] = X0;   mat[4] = X1;   mat[ 8] = X2;   mat[12] = 0;
+    mat[1] = Y0;   mat[5] = Y1;   mat[ 9] = Y2;   mat[13] = 0;
+    mat[2] = Z0;   mat[6] = Z1;   mat[10] = Z2;   mat[14] = 0;
+    mat[3] =  0;   mat[7] =  0;   mat[11] =  0;   mat[15] = 1;
      //  Save transformation
      glPushMatrix();
      //  Offset
      glTranslated(x,y,z);
-     glRotated(th,0,1,0);
+     glMultMatrixd(mat);
      glScaled(dx,dy,dz);
      int i;
      float f;
@@ -143,6 +160,7 @@ static void barrel(double x,double y,double z,
        glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
      }
      glEnd();
+     glPopMatrix();
 }
 
 
@@ -172,10 +190,14 @@ void display()
       glRotatef(ph,1,0,0);
       glRotatef(th,0,1,0);
    }
-   //  Draw cubes
-   barrel(0,0,0 , 0.3,0.5,0.3 , 0);
-   barrel(2,2,2, 0.3,0.3,0.3 , 0);
-   barrel(-3,-3,-3, 0.5,0.3,0.5 , 30);
+   //  Draw Barells
+   barrel(0,0,0, 0.5,0.5,0.5 , 0,Sin(10*idle),0);
+   barrel(Cos(idle),Sin(idle), 0 ,.3,.3,.3 , Cos(3*idle),0,Sin(3*idle));
+   barrel(0,2*Cos(idle),2*Sin(idle) ,.3,.3,.3 , Sin(2*idle),Cos(2*idle),0);
+   barrel(3*Sin(idle), 0, 3*Cos(idle),.3,.3,.3 , 0,Sin(1*idle),Cos(1*idle));
+  //  barrel(0,3*Cos(idle),0 , 0.3,0.5,0.3 , 0,0,0);
+  //  barrel(-4,-4,-4, 0.5,0.3,0.5 , 30,0,0);
+  //  barrel(-2,0,-2, 0.5,3.0,0.5 , 1,0,0);
    //  Draw axes
    glColor3f(1,1,1);
    if (axes)
@@ -197,7 +219,7 @@ void display()
       Print("Z");
    }
    //  Display parameters
-   glWindowPos2i(5,5);
+   glWindowPos2i(10,10);
    Print("Angle=%d,%d  Dim=%.1f FOV=%d Projection=%s",th,ph,dim,fov,mode?"Perpective":"Orthogonal");
    //  Render the scene and make it visible
    glFlush();
@@ -278,6 +300,16 @@ void reshape(int width,int height)
 }
 
 /*
+ *  GLUT calls this toutine when there is nothing else to do
+ */
+void idlefunc()
+{
+   double t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+   idle = fmod(90*t,360);
+   glutPostRedisplay();
+}
+
+/*
  *  Start up GLUT and tell it what to do
  */
 int main(int argc,char* argv[])
@@ -287,7 +319,8 @@ int main(int argc,char* argv[])
    //  Request double buffered, true color window with Z buffering at 600x600
    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
    glutInitWindowSize(600,600);
-   glutCreateWindow("Projections");
+   glutCreateWindow("Samuel Volin");
+   glutIdleFunc(idlefunc);
    //  Set callbacks
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);

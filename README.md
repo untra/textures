@@ -1,4 +1,4 @@
-# projections
+# Objects in 3d
 ## Made by Samuel Volin for Fall 2015 CSCI-4229
 
 

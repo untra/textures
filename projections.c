@@ -195,9 +195,7 @@ void display()
    barrel(Cos(idle),Sin(idle), 0 ,.3,.3,.3 , Cos(3*idle),0,Sin(3*idle));
    barrel(0,2*Cos(idle),2*Sin(idle) ,.3,.3,.3 , Sin(2*idle),Cos(2*idle),0);
    barrel(3*Sin(idle), 0, 3*Cos(idle),.3,.3,.3 , 0,Sin(1*idle),Cos(1*idle));
-  //  barrel(0,3*Cos(idle),0 , 0.3,0.5,0.3 , 0,0,0);
-  //  barrel(-4,-4,-4, 0.5,0.3,0.5 , 30,0,0);
-  //  barrel(-2,0,-2, 0.5,3.0,0.5 , 1,0,0);
+
    //  Draw axes
    glColor3f(1,1,1);
    if (axes)

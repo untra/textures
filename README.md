@@ -10,6 +10,8 @@
 
 * left-click dragging horizontally will rotate the view around the x axis
 
+* left-click dragging vertically will rotate the view around the y axis
+
 * scrolling in and out will zoom in and out, respectively.
 
 * m will change the projection mode

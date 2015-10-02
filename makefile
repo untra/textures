@@ -1,5 +1,5 @@
 # Example 7
-EXE=hw3
+EXE=hw4
 
 # Main target
 all: $(EXE)
@@ -30,7 +30,7 @@ endif
 	g++ -c $(CFLG) $<
 
 #  Link
-hw3:projections.o
+hw4:projections.o
 	gcc -O3 -o $@ $^   $(LIBS)
 
 #  Clean

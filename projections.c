@@ -35,6 +35,8 @@ double idle = 0.0;
 int window_width = 600;
 int window_height = 600;
 int left_click_down = 0;
+int saved_th = 0;
+int saved_ph = 0;
 
 //  Macro for sin & cos in degrees
 #define Cos(th) cos(3.1415927/180*(th))
@@ -82,6 +84,10 @@ static void Project()
    glLoadIdentity();
 }
 
+double mouse_rotation(double delta, double mid)
+{
+  return 180 * (delta / mid);
+}
 
 static void barrel(double x, double y, double z,
 		      double dx, double dy, double dz,
@@ -221,10 +227,10 @@ void special(int key,int x,int y)
       th += 5;
    //  Left arrow key - decrease angle by 5 degrees
    else if (key == GLUT_KEY_LEFT)
-      th -= 5;
+      th += 5;
    //  Up arrow key - increase elevation by 5 degrees
    else if (key == GLUT_KEY_UP)
-      ph += 5;
+      ph -= 5;
    //  Down arrow key - decrease elevation by 5 degrees
    else if (key == GLUT_KEY_DOWN)
       ph -= 5;
@@ -287,14 +293,12 @@ void mouse(int button, int state, int x, int y)
         left_click_down = 1;
       else if (state == GLUT_UP)
         left_click_down = 0;
-    }
-    if (left_click_down)
-    {
       double midx = (window_width / 2);
-      double midy = (window_width / 2);
+      double midy = (window_height / 2);
       double deltax = (midx - x);
-      th += 90 * (deltax / midx);
-      glutWarpPointer(midx, midy);
+      double deltay = (midy - y);
+      saved_th = th - mouse_rotation(deltax , midx);
+      saved_ph = ph - mouse_rotation(deltay , midy);
     }
     //  Update projection
     Project();
@@ -307,17 +311,21 @@ void motionmouse(int x, int y)
   if (left_click_down)
   {
     double midx = (window_width / 2);
-    // double midy = (window_width / 2);
+    double midy = (window_height / 2);
     double deltax = (midx - x);
-    th = 180 * (deltax / midx);
-    // glutWarpPointer(midx, midy);
+    double deltay = (midy - y);
+    th = mouse_rotation(deltax , midx) + saved_th;
+    ph = mouse_rotation(deltay , midy) + saved_ph;
+    th %= 360;
+    ph %= 360;
   }
-
   //  Update projection
   Project();
   //  Tell GLUT it is necessary to redisplay the scene
   glutPostRedisplay();
 }
+
+
 
 /*
  *  GLUT calls this routine when the window is resized

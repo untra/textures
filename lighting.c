@@ -127,6 +127,8 @@ static void barrel(double x, double y, double z,
     int resolution = 24;
     double fraction = 15;
     double ex = 1.25;
+    double tilt = Sin(60);
+    double oneminustilt = 1 - tilt;
     // Translations
     glPushMatrix();
     glTranslated(x, y, z);
@@ -136,6 +138,7 @@ static void barrel(double x, double y, double z,
      float f;
      glBegin(GL_TRIANGLE_FAN);
      glColor3f(1,1,1);
+     glNormal3f( 0, -1, 0);
      glVertex3f(0,-1, 0);
      //bottom
      for(i = 0; i <= resolution ; i++)
@@ -149,6 +152,7 @@ static void barrel(double x, double y, double z,
      for(i = 0; i <= resolution ; i++)
      {
        f = (float)i / resolution;
+       glNormal3f( oneminustilt * Cos(fraction*i), -tilt, oneminustilt * Sin(fraction*i));
        glColor3f( f ,1.0-f, 0);
        glVertex3f(Cos(fraction*i),-1, Sin(fraction*i));
        glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
@@ -158,7 +162,9 @@ static void barrel(double x, double y, double z,
      glBegin(GL_QUAD_STRIP);
      for(i = 0; i <= resolution ; i++)
      {
+
        f = (float)i / resolution;
+       glNormal3f( Cos(fraction*i), 0, Sin(fraction*i));
        glColor3f(0, f ,1.0-f);
        glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
        glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
@@ -169,6 +175,7 @@ static void barrel(double x, double y, double z,
      for(i = 0; i <= resolution ; i++)
      {
        f = (float)i / resolution;
+       glNormal3f( oneminustilt * Cos(fraction*i), tilt,  oneminustilt * Sin(fraction*i));
        glColor3f(1.0 - f, 0 ,f);
        glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
        glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
@@ -177,6 +184,7 @@ static void barrel(double x, double y, double z,
      //top
      glBegin(GL_TRIANGLE_FAN);
      glColor3f(1,1,1);
+     glNormal3f( 0, 1, 0);
      glVertex3f(0,1, 0);
      for(i = 0; i <= resolution ; i++)
      {
@@ -310,8 +318,6 @@ void display()
    //  Display parameters
    glWindowPos2i(10,10);
    Print("Angle=%d,%d  Dim=%.1f FOV=%d Projection=%s",th,ph,dim,fov,mode?"Perpective":"Orthogonal");
-   Print("L=%d",left_click_down);
-   //  Render the scene and make it visible
    glFlush();
    glutSwapBuffers();
 }
@@ -326,10 +332,10 @@ void special(int key,int x,int y)
       th += 5;
    //  Left arrow key - decrease angle by 5 degrees
    else if (key == GLUT_KEY_LEFT)
-      th += 5;
+      th -= 5;
    //  Up arrow key - increase elevation by 5 degrees
    else if (key == GLUT_KEY_UP)
-      ph -= 5;
+      ph += 5;
    //  Down arrow key - decrease elevation by 5 degrees
    else if (key == GLUT_KEY_DOWN)
       ph -= 5;

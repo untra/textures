@@ -1,4 +1,4 @@
-# Projections
+# Lighting Hw 5
 ## Made by Samuel Volin for Fall 2015 CSCI-4229
 
 

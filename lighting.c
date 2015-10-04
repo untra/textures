@@ -38,6 +38,23 @@ int left_click_down = 0;
 int saved_th = 0;
 int saved_ph = 0;
 
+int light = 1;
+int move=1;       //  Move light
+// Light values
+int one       =   1;  // Unit value
+int distance  =   5;  // Light distance
+int inc       =  10;  // Ball increment
+int smooth    =   1;  // Smooth/Flat shading
+int local     =   0;  // Local Viewer Model
+int emission  =   0;  // Emission intensity (%)
+int ambient   =  30;  // Ambient intensity (%)
+int diffuse   = 100;  // Diffuse intensity (%)
+int specular  =   0;  // Specular intensity (%)
+int shininess =   0;  // Shininess (power of two)
+float shinyvec[1];    // Shininess (value)
+int zh        =  90;  // Light azimuth
+float ylight  =   0;  // Elevation of light
+
 //  Macro for sin & cos in degrees
 #define Cos(th) cos(3.1415927/180*(th))
 #define Sin(th) sin(3.1415927/180*(th))
@@ -87,6 +104,20 @@ static void Project()
 double mouse_rotation(double delta, double mid)
 {
   return 180 * (delta / mid);
+}
+
+/*
+ *  Draw vertex in polar coordinates with normal
+ */
+static void Vertex(double th,double ph)
+{
+   double x = Sin(th)*Cos(ph);
+   double y = Cos(th)*Cos(ph);
+   double z =         Sin(ph);
+   //  For a sphere at the origin, the position
+   //  and normal vectors are the same
+   glNormal3d(x,y,z);
+   glVertex3d(x,y,z);
 }
 
 static void barrel(double x, double y, double z,
@@ -155,6 +186,36 @@ static void barrel(double x, double y, double z,
      glPopMatrix();
 }
 
+static void ball(double x,double y,double z,double r)
+{
+   int th,ph;
+   float yellow[] = {1.0,1.0,0.0,1.0};
+   float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+   //  Save transformation
+   glPushMatrix();
+   //  Offset, scale and rotate
+   glTranslated(x,y,z);
+   glScaled(r,r,r);
+   //  White ball
+   glColor3f(1,1,1);
+   glMaterialfv(GL_FRONT,GL_SHININESS,shinyvec);
+   glMaterialfv(GL_FRONT,GL_SPECULAR,yellow);
+   glMaterialfv(GL_FRONT,GL_EMISSION,Emission);
+   //  Bands of latitude
+   for (ph=-90;ph<90;ph+=inc)
+   {
+      glBegin(GL_QUAD_STRIP);
+      for (th=0;th<=360;th+=2*inc)
+      {
+         Vertex(th,ph);
+         Vertex(th,ph+inc);
+      }
+      glEnd();
+   }
+   //  Undo transofrmations
+   glPopMatrix();
+}
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -182,11 +243,49 @@ void display()
       glRotatef(ph,1,0,0);
       glRotatef(th,0,1,0);
    }
+
+
+   //  Flat or smooth shading
+  glShadeModel(smooth ? GL_SMOOTH : GL_FLAT);
+
+   //  Light switch
+   if (light)
+   {
+        //  Translate intensity to color vectors
+        float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
+        float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
+        float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
+        //  Light position
+        float Position[]  = {distance*Cos(idle),ylight,distance*Sin(idle),1.0};
+        //  Draw light position as ball (still no lighting here)
+        glColor3f(1,1,1);
+        ball(Position[0],Position[1],Position[2] , 0.1);
+        //  OpenGL should normalize normal vectors
+        glEnable(GL_NORMALIZE);
+        //  Enable lighting
+        glEnable(GL_LIGHTING);
+        //  Location of viewer for specular calculations
+        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+        //  glColor sets ambient and diffuse color materials
+        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+        glEnable(GL_COLOR_MATERIAL);
+        //  Enable light 0
+        glEnable(GL_LIGHT0);
+        //  Set ambient, diffuse, specular components and position of light 0
+        glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
+        glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
+        glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+        glLightfv(GL_LIGHT0,GL_POSITION,Position);
+   }
+
    //  Draw Barells
    barrel(0,0,0, 0.5,0.5,0.5 , 0);
    barrel(Cos(idle),Sin(idle), 0 ,.3,.3,.3 , Cos(3*idle));
    barrel(0,2*Cos(idle),2*Sin(idle) ,.3,.3,.3 , Sin(2*idle));
    barrel(3*Sin(idle), 0, 3*Cos(idle),.3,.3,.3 , 0);
+
+  //  disbale lighting from here on
+  glDisable(GL_LIGHTING);
 
    //  Draw axes
    glColor3f(1,1,1);
@@ -261,16 +360,59 @@ void key(unsigned char ch,int x,int y)
    else if (ch == '0')
       th = ph = 0;
    //  Toggle axes
-   else if (ch == 'a' || ch == 'A')
-      axes = 1-axes;
-   //  Switch display mode
-   else if (ch == 'm' || ch == 'M')
-      mode = 1-mode;
-   //  Change field of view angle
-   else if (ch == '-' && ch>1)
-      fov--;
-   else if (ch == '+' && ch<179)
-      fov++;
+   else if (ch == 'x' || ch == 'X')
+    axes = 1-axes;
+    //  Toggle lighting
+    else if (ch == 'l' || ch == 'L')
+       light = 1-light;
+    //  Switch projection mode
+    else if (ch == 'p' || ch == 'P')
+       mode = 1-mode;
+    //  Toggle light movement
+    else if (ch == 'm' || ch == 'M')
+       move = 1-move;
+    //  Move light
+    else if (ch == '<')
+       zh += 1;
+    else if (ch == '>')
+       zh -= 1;
+    //  Change field of view angle
+    else if (ch == '-' && ch>1)
+       fov--;
+    else if (ch == '+' && ch<179)
+       fov++;
+    //  Light elevation
+    else if (ch=='[')
+       ylight -= 0.1;
+    else if (ch==']')
+       ylight += 0.1;
+    //  Ambient level
+    else if (ch=='a' && ambient>0)
+       ambient -= 5;
+    else if (ch=='A' && ambient<100)
+       ambient += 5;
+    //  Diffuse level
+    else if (ch=='d' && diffuse>0)
+       diffuse -= 5;
+    else if (ch=='D' && diffuse<100)
+       diffuse += 5;
+    //  Specular level
+    else if (ch=='s' && specular>0)
+       specular -= 5;
+    else if (ch=='S' && specular<100)
+       specular += 5;
+    //  Emission level
+    else if (ch=='e' && emission>0)
+       emission -= 5;
+    else if (ch=='E' && emission<100)
+       emission += 5;
+    //  Shininess level
+    else if (ch=='n' && shininess>-1)
+       shininess -= 1;
+    else if (ch=='N' && shininess<7)
+       shininess += 1;
+      //  Translate shininess power to value (-1 => 0)
+      shinyvec[0] = shininess<0 ? 0 : pow(2.0,shininess);
    //  Reproject
    Project();
    //  Tell GLUT it is necessary to redisplay the scene

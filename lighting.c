@@ -374,14 +374,6 @@ void key(unsigned char ch,int x,int y)
     //  Switch projection mode
     else if (ch == 'p' || ch == 'P')
        mode = 1-mode;
-    //  Toggle light movement
-    else if (ch == 'm' || ch == 'M')
-       move = 1-move;
-    //  Move light
-    else if (ch == '<')
-       zh += 1;
-    else if (ch == '>')
-       zh -= 1;
     //  Change field of view angle
     else if (ch == '-' && ch>1)
        fov--;

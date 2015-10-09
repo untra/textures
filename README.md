@@ -17,3 +17,19 @@
 * m will change the projection mode
 
 * 0 resets the view
+
+* 'l' toggles lighting
+
+* a/A decrease/increase ambient light
+
+* d/D decrease/increase diffuse light
+
+* s/S decrease/increase specular light
+
+* e/E decrease/increase emitted light
+
+* n/N decrease/increase shininess
+
+* -/+ decrease/increase the field of view
+
+* [/] decreases/increases the light y-component

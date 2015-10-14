@@ -1,7 +1,8 @@
 /*
-*  Projections
+*  Textures
 *
 *  Draws 3 Barrells to demonstrate orthogonal & prespective projections
+*  Throws in some lighting and sweet barrel textures as well
 *
 *  Key bindings:
 *  m          Toggle between perspective and orthogonal

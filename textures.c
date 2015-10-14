@@ -548,7 +548,7 @@ static void barrel(double x, double y, double z,
     glutMotionFunc(motionmouse);
     glutKeyboardFunc(key);
     // load textures
-    end = LoadTexBMP("head.bmp");
+    end = LoadTexBMP("end.bmp");
     side = LoadTexBMP("side.bmp");
     //  Pass control to GLUT so it can interact with the user
     glutMainLoop();

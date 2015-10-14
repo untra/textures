@@ -14,7 +14,7 @@
 
 * scrolling in and out will zoom in and out, respectively.
 
-* m will change the projection mode
+* p will change the projection mode
 
 * 0 resets the view
 

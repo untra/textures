@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
+#include "CSCIx229.h"
 
 //  OpenGL with prototypes for glext
 #define GL_GLEXT_PROTOTYPES
@@ -56,11 +57,6 @@ float shinyvec[1];    // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   0;  // Elevation of light
 
-//  Macro for sin & cos in degrees
-#define Cos(th) cos(3.1415927/180*(th))
-#define Sin(th) sin(3.1415927/180*(th))
-#define aCos(th) abs(cos(3.1415927/180*(th)))
-#define aSin(th) abs(sin(3.1415927/180*(th)))
 
 double EX = 0; // x-coordinate of camera position
 double EY = 0; // y-coordinate of camera position
@@ -98,23 +94,23 @@ void Print(const char* format , ...)
 /*
 *  Set projection
 */
-static void Project()
-{
-  //  Tell OpenGL we want to manipulate the projection matrix
-  glMatrixMode(GL_PROJECTION);
-  //  Undo previous transformations
-  glLoadIdentity();
-  //  Perspective transformation
-  if (mode)
-  gluPerspective(fov,asp,dim/4,4*dim);
-  //  Orthogonal projection
-  else
-  glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
-  //  Switch to manipulating the model matrix
-  glMatrixMode(GL_MODELVIEW);
-  //  Undo previous transformations
-  glLoadIdentity();
-}
+// static void Project()
+// {
+//   //  Tell OpenGL we want to manipulate the projection matrix
+//   glMatrixMode(GL_PROJECTION);
+//   //  Undo previous transformations
+//   glLoadIdentity();
+//   //  Perspective transformation
+//   if (mode)
+//   gluPerspective(fov,asp,dim/4,4*dim);
+//   //  Orthogonal projection
+//   else
+//   glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
+//   //  Switch to manipulating the model matrix
+//   glMatrixMode(GL_MODELVIEW);
+//   //  Undo previous transformations
+//   glLoadIdentity();
+// }
 
 double mouse_rotation(double delta, double mid)
 {
@@ -373,7 +369,7 @@ static void barrel(double x, double y, double z,
     th %= 360;
     ph %= 360;
     //  Update projection
-    Project();
+    Project(fov,asp,dim);
     //  Tell GLUT it is necessary to redisplay the scene
     glutPostRedisplay();
   }
@@ -451,7 +447,7 @@ static void barrel(double x, double y, double z,
     //  Translate shininess power to value (-1 => 0)
     shinyvec[0] = shininess<0 ? 0 : pow(2.0,shininess);
     //  Reproject
-    Project();
+    Project(fov,asp,dim);
     //  Tell GLUT it is necessary to redisplay the scene
     glutPostRedisplay();
   }
@@ -480,7 +476,7 @@ static void barrel(double x, double y, double z,
       saved_ph = ph - mouse_rotation(deltay , midy);
     }
     //  Update projection
-    Project();
+    Project(fov,asp,dim);
     //  Tell GLUT it is necessary to redisplay the scene
     glutPostRedisplay();
   }
@@ -499,7 +495,7 @@ static void barrel(double x, double y, double z,
       ph %= 360;
     }
     //  Update projection
-    Project();
+    Project(fov,asp,dim);
     //  Tell GLUT it is necessary to redisplay the scene
     glutPostRedisplay();
   }
@@ -518,7 +514,7 @@ static void barrel(double x, double y, double z,
     //  Set the viewport to the entire window
     glViewport(0,0, width,height);
     //  Set projection
-    Project();
+    Project(fov,asp,dim);
   }
 
   /*

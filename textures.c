@@ -57,7 +57,8 @@ int shininess =   0;  // Shininess (power of two)
 float shinyvec[1];    // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   0;  // Elevation of light
-unsigned int texture = 0;
+unsigned int side = 0;// side texture
+unsigned int end = 0; // end texture
 
 
 double EX = 0; // x-coordinate of camera position
@@ -120,6 +121,7 @@ static void barrel(double x, double y, double z,
     double ex = 1.25;
     double tilt = Sin(60);
     double oneminustilt = 1 - tilt;
+    glEnable(GL_TEXTURE_2D);
     // Translations
     glPushMatrix();
     glTranslated(x, y, z);
@@ -127,63 +129,71 @@ static void barrel(double x, double y, double z,
     glScaled(dx, dy, dz);
     int i;
     float f;
-    glBindTexture(GL_TEXTURE_2D,texture);
+
+
+
+    glBindTexture(GL_TEXTURE_2D,end);
     glBegin(GL_TRIANGLE_FAN);
     glColor3f(1,1,1);
     glNormal3f( 0, -1, 0);
+    glTexCoord2f(0.55,0.5);
     glVertex3f(0,-1, 0);
     //bottom
     for(i = 0; i <= resolution ; i++)
     {
+      glTexCoord2f(0.47*Cos(fraction*i)+0.60,0.5*Sin(fraction*i)+0.5);
       glVertex3f(Cos(fraction*i),-1, Sin(fraction*i));
     }
     glEnd();
-    glDisable(GL_TEXTURE_2D);
-    for(i = 0; i <= resolution ; i++)
+
+
+
+
     //side 1
-    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindTexture(GL_TEXTURE_2D,side);
     glBegin(GL_QUAD_STRIP);
+    glColor3f(1,1,1);
     for(i = 0; i <= resolution ; i++)
     {
-      f = (float)i / resolution;
+      f = (double)i / resolution;
       glNormal3f( oneminustilt * Cos(fraction*i), -tilt, oneminustilt * Sin(fraction*i));
-      glColor3f( f ,1.0-f, 0);
-      glVertex3f(Cos(fraction*i),-1, Sin(fraction*i));
-      glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
+      glTexCoord2f(f,0.0); glVertex3f(Cos(fraction*i),-1, Sin(fraction*i));
+      glTexCoord2f(f,0.2); glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
     }
     glEnd();
     //side 2
     glBegin(GL_QUAD_STRIP);
+    glColor3f(1,1,1);
     for(i = 0; i <= resolution ; i++)
     {
 
-      f = (float)i / resolution;
+      f = (double)i / resolution;
       glNormal3f( Cos(fraction*i), 0, Sin(fraction*i));
-      glColor3f(0, f ,1.0-f);
-      glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
-      glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
+      glTexCoord2f(f,0.2); glVertex3f(ex*Cos(fraction*i),-0.5, ex*Sin(fraction*i));
+      glTexCoord2f(f,0.8); glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
     }
     glEnd();
     //side 3
     glBegin(GL_QUAD_STRIP);
+    glColor3f(1,1,1);
     for(i = 0; i <= resolution ; i++)
     {
-      f = (float)i / resolution;
+      f = (double)i / resolution;
       glNormal3f( oneminustilt * Cos(fraction*i), tilt,  oneminustilt * Sin(fraction*i));
-      glColor3f(1.0 - f, 0 ,f);
-      glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
-      glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
+      glTexCoord2f(f,0.8); glVertex3f(ex*Cos(fraction*i),0.5, ex*Sin(fraction*i));
+      glTexCoord2f(f,1.0); glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
     }
     glEnd();
-    glDisable(GL_TEXTURE_2D);
-    //top
-    glBindTexture(GL_TEXTURE_2D,texture);
+
+    glBindTexture(GL_TEXTURE_2D,end);
     glBegin(GL_TRIANGLE_FAN);
     glColor3f(1,1,1);
     glNormal3f( 0, 1, 0);
+    glTexCoord2f(0.55,0.5);
     glVertex3f(0,1, 0);
     for(i = 0; i <= resolution ; i++)
     {
+      glTexCoord2f(0.47*Cos(fraction*i)+0.60, 0.5*Sin(fraction*i)+0.5);
       glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
     }
     glEnd();
@@ -266,30 +276,28 @@ static void barrel(double x, double y, double z,
     if (light)
     {
       //  Translate intensity to color vectors
-      float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
-      float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
-      float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
-      //  Light position
-      float Position[]  = {distance*Cos(idle),ylight,distance*Sin(idle),1.0};
+      float Ambient[]   = {0.3,0.3,0.3,1.0};
+      float Diffuse[]   = {1,1,1,1};
+      float Specular[]  = {1,1,0,1};
+      float white[]     = {1,1,1,1};
+      //  Light direction
+      float Position[]  = {5*Cos(zh),0,5*Sin(zh),1};
       //  Draw light position as ball (still no lighting here)
-      glColor3f(1,1,1);
       ball(Position[0],Position[1],Position[2] , 0.1);
-      //  OpenGL should normalize normal vectors
-      glEnable(GL_NORMALIZE);
-      //  Enable lighting
+      //  Enable lighting with normalization
       glEnable(GL_LIGHTING);
-      //  Location of viewer for specular calculations
-      glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+      glEnable(GL_NORMALIZE);
       //  glColor sets ambient and diffuse color materials
       glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
       glEnable(GL_COLOR_MATERIAL);
       //  Enable light 0
       glEnable(GL_LIGHT0);
-      //  Set ambient, diffuse, specular components and position of light 0
       glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
       glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
       glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
       glLightfv(GL_LIGHT0,GL_POSITION,Position);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
     }
 
     //  Draw Barells
@@ -540,7 +548,8 @@ static void barrel(double x, double y, double z,
     glutMotionFunc(motionmouse);
     glutKeyboardFunc(key);
     // load textures
-    texture = LoadTexBMP("barrel.bmp");
+    end = LoadTexBMP("head.bmp");
+    side = LoadTexBMP("side.bmp");
     //  Pass control to GLUT so it can interact with the user
     glutMainLoop();
     return 0;

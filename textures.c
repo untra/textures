@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <math.h>
 #include "CSCIx229.h"
 
@@ -56,6 +57,7 @@ int shininess =   0;  // Shininess (power of two)
 float shinyvec[1];    // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   0;  // Elevation of light
+unsigned int texture = 0;
 
 
 double EX = 0; // x-coordinate of camera position
@@ -89,28 +91,6 @@ void Print(const char* format , ...)
   glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*ch++);
 }
 
-
-
-/*
-*  Set projection
-*/
-// static void Project()
-// {
-//   //  Tell OpenGL we want to manipulate the projection matrix
-//   glMatrixMode(GL_PROJECTION);
-//   //  Undo previous transformations
-//   glLoadIdentity();
-//   //  Perspective transformation
-//   if (mode)
-//   gluPerspective(fov,asp,dim/4,4*dim);
-//   //  Orthogonal projection
-//   else
-//   glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
-//   //  Switch to manipulating the model matrix
-//   glMatrixMode(GL_MODELVIEW);
-//   //  Undo previous transformations
-//   glLoadIdentity();
-// }
 
 double mouse_rotation(double delta, double mid)
 {
@@ -248,22 +228,22 @@ static void barrel(double x, double y, double z,
     glEnable(GL_DEPTH_TEST);
     //  Undo previous transformations
     glLoadIdentity();
+    //  Orthogonal - set world orientation
+    if(mode == 0)
+    {
+      glRotatef(ph,1,0,0);
+      glRotatef(th,0,1,0);
+    }
     //  Perspective - set eye position
-    if (mode == 1)
+    else if (mode == 1)
     {
       double Ex = -2*dim*Sin(th)*Cos(ph);
       double Ey = +2*dim        *Sin(ph);
       double Ez = +2*dim*Cos(th)*Cos(ph);
       gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
     }
-    //  Orthogonal - set world orientation
-    else if(mode == 0)
-    {
-      glRotatef(ph,1,0,0);
-      glRotatef(th,0,1,0);
-    }
     // First person view
-    else if(mode == 2){
+    else{
 		// Recalculate where the camera is looking
 		AX = -2*dim*Sin(th)*Cos(ph);
 		AY = -2*dim*Sin(ph);
@@ -337,7 +317,7 @@ static void barrel(double x, double y, double z,
     }
     //  Display parameters
     glWindowPos2i(10,10);
-    Print("Angle=%d,%d  Dim=%.1f FOV=%d Projection=%s",th,ph,dim,fov,mode?"Perpective":"Orthogonal");
+    Print("Angle=%d,%d  Dim=%.1f FOV=%d Projection=%d",th,ph,dim,fov,mode);
     glFlush();
     glutSwapBuffers();
   }
@@ -398,7 +378,13 @@ static void barrel(double x, double y, double z,
     light = 1-light;
     //  Switch projection mode
     else if (ch == 'p' || ch == 'P')
+    {
     mode = (mode+1)%3;
+    th = ph = 0;
+    EX = 0;
+    EY = 0;
+    EZ = 2*dim;
+    }
     //  Change field of view angle
     else if (ch == '-' && ch>1)
     fov--;
@@ -547,6 +533,8 @@ static void barrel(double x, double y, double z,
     glutMouseFunc(mouse);
     glutMotionFunc(motionmouse);
     glutKeyboardFunc(key);
+    // load textures
+    texture = LoadTexBMP("edge.bmp");
     //  Pass control to GLUT so it can interact with the user
     glutMainLoop();
     return 0;

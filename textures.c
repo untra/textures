@@ -127,6 +127,7 @@ static void barrel(double x, double y, double z,
     glScaled(dx, dy, dz);
     int i;
     float f;
+    glBindTexture(GL_TEXTURE_2D,texture);
     glBegin(GL_TRIANGLE_FAN);
     glColor3f(1,1,1);
     glNormal3f( 0, -1, 0);
@@ -137,8 +138,10 @@ static void barrel(double x, double y, double z,
       glVertex3f(Cos(fraction*i),-1, Sin(fraction*i));
     }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
     for(i = 0; i <= resolution ; i++)
     //side 1
+    glBindTexture(GL_TEXTURE_2D,texture);
     glBegin(GL_QUAD_STRIP);
     for(i = 0; i <= resolution ; i++)
     {
@@ -172,7 +175,9 @@ static void barrel(double x, double y, double z,
       glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
     }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
     //top
+    glBindTexture(GL_TEXTURE_2D,texture);
     glBegin(GL_TRIANGLE_FAN);
     glColor3f(1,1,1);
     glNormal3f( 0, 1, 0);
@@ -182,6 +187,7 @@ static void barrel(double x, double y, double z,
       glVertex3f(Cos(fraction*i),1, Sin(fraction*i));
     }
     glEnd();
+    glDisable(GL_TEXTURE_2D);
     glPopMatrix();
   }
 
@@ -534,7 +540,7 @@ static void barrel(double x, double y, double z,
     glutMotionFunc(motionmouse);
     glutKeyboardFunc(key);
     // load textures
-    texture = LoadTexBMP("edge.bmp");
+    texture = LoadTexBMP("barrel.bmp");
     //  Pass control to GLUT so it can interact with the user
     glutMainLoop();
     return 0;

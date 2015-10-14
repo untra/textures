@@ -33,3 +33,7 @@
 * -/+ decrease/increase the field of view
 
 * [/] decreases/increases the light y-component
+
+* f moves forward (in first person mode only)
+
+* v moves backward (in first person mode only)

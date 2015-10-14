@@ -20,4 +20,3 @@ void Project(double fov,double asp,double dim)
    //  Undo previous transformations
    glLoadIdentity();
 }
-

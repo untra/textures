@@ -270,7 +270,7 @@ static void barrel(double x, double y, double z,
 
 
     //  Flat or smooth shading
-    glShadeModel(smooth ? GL_SMOOTH : GL_FLAT);
+    // glShadeModel(smooth ? GL_SMOOTH : GL_FLAT);
 
     //  Light switch
     if (light)
@@ -281,17 +281,22 @@ static void barrel(double x, double y, double z,
       float Specular[]  = {1,1,0,1};
       float white[]     = {1,1,1,1};
       //  Light direction
-      float Position[]  = {5*Cos(zh),0,5*Sin(zh),1};
+      float Position[]  = {5*Cos(idle),0,5*Sin(idle),1};
+      // printf("%f | %f | %f\n" , Position[0] , Position[1] , Position[2]    );
       //  Draw light position as ball (still no lighting here)
       ball(Position[0],Position[1],Position[2] , 0.1);
       //  Enable lighting with normalization
-      glEnable(GL_LIGHTING);
       glEnable(GL_NORMALIZE);
+      //  Enable lighting
+      glEnable(GL_LIGHTING);
+      //  Location of viewer for specular calculations
+      glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
       //  glColor sets ambient and diffuse color materials
       glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
       glEnable(GL_COLOR_MATERIAL);
       //  Enable light 0
       glEnable(GL_LIGHT0);
+      //  Set ambient, diffuse, specular components and position of light 0
       glLightfv(GL_LIGHT0,GL_AMBIENT ,Ambient);
       glLightfv(GL_LIGHT0,GL_DIFFUSE ,Diffuse);
       glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
